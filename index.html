@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <link
+      rel="apple-touch-icon"
+      type="image/png"
+      href="https://cpwebassets.codepen.io/assets/favicon/apple-touch-icon-5ae1a0698dcc2402e9712f7d01ed509a57814f994c660df9f7a952f3060705ee.png"
+    />
+
+    <meta name="apple-mobile-web-app-title" content="CodePen" />
+
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="https://cpwebassets.codepen.io/assets/favicon/favicon-aec34940fbc1a6e787974dcd360f2c6b63348d4b1f4e06c77743096d55480f33.ico"
+    />
+
+    <link
+      rel="mask-icon"
+      type="image/x-icon"
+      href="https://cpwebassets.codepen.io/assets/favicon/logo-pin-b4b4269c16397ad2f0f7a01bcdf513a1994f4c94b8af2f191c09eb0d601762b1.svg"
+      color="#111"
+    />
+
+    <script src="https://cpwebassets.codepen.io/assets/common/stopExecutionOnTimeout-2c7831bb44f98c1391d6a4ffda0e1fd302503391ca806e7fcc7b9b87197aec26.js"></script>
+
+    <title>UI Challenge - Week 6 - Audio Player</title>
+
+    <link rel="canonical" href="https://codepen.io/mattstvartak/pen/WQBvMr" />
+
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Raleway:400,300,700);
+      *,
+      *:before,
+      *:after {
+        box-sizing: border-box;
+      }
+
+      body {
+        color: #ffffff;
+        font-family: "Raleway", sans-serif;
+        background: url("/a.png");
+        background-position: center;
+        background-color: #244e63;
+        background-repeat: no-repeat;
+        animation: bga 5s infinite alternate-reverse;
+    
+      }
+      @keyframes bga {
+        0% {
+          background-size: 150%;
+        }
+
+        100% {
+          background-size: 125%;
+        }
+      }
+      .bgbg {
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        left: 0;
+        top: 0;
+        background: linear-gradient(
+          90deg,
+          #000000ad,
+          #0000005d,
+          #0000005d,
+          #00000045,
+          #00000045,
+          #0000009c
+        );
+        background-size: 400% 400%;
+        animation: gradient 15s infinite;
+      }
+      @keyframes gradient {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      .music-player-container {
+        -webkit-transform: translate(-50%, -50%);
+        -oz-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        -o-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+        display: inline-block;
+        height: 370px;
+        position: absolute;
+        min-width: 425px;
+        left: 50%;
+        top: 29%;
+        zoom: 1.7;
+      }
+      .music-player-container:after {
+        -webkit-filter: blur(8px);
+        filter: blur(8px);
+        bottom: -2px;
+        content: " ";
+        display: block;
+        height: 10px;
+        left: 19px;
+        position: absolute;
+        transform: rotate(-3deg);
+        width: 70%;
+        z-index: 0;
+      }
+
+      .music-player {
+        background-color: #0000005c;
+        height: 600px;
+        padding: 87px 53px 111px 46px;
+        box-shadow: inset -8px -7px 10px black, inset white 3px 3px 13px,
+          black 17px 16px 20px;
+        position: absolute;
+        text-align: left;
+        width: 425px;
+        z-index: 3;
+        border-radius: 20px;
+        backdrop-filter: blur(5px);
+      }
+
+      .player-content-container {
+        -webkit-transform: translateY(-50%);
+        -moz-transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+        -o-transform: translateY(-50%);
+        transform: translateY(-50%);
+        top: 80%;
+        position: relative;
+      }
+
+      .artist-name {
+        font-size: 28px;
+        font-weight: normal;
+        margin: 0 0 0.75em 0;
+      }
+
+      .album-title {
+        font-weight: 200;
+        font-size: 24px;
+        margin: 0 0 1.75em 0;
+      }
+
+      .song-title {
+        font-size: 18px;
+        font-weight: 200;
+        margin: 0 0 1.5em 0;
+      }
+
+      .album {
+        box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.65);
+        height: 245px;
+        margin-left: 45px;
+        margin-top: 45px;
+        position: relative;
+        width: 245px;
+        border-radius: 15px;
+        z-index: 10;
+      }
+
+      .album-art {
+        background: #fff url("/cover.jpg") center/cover no-repeat;
+        height: 245px;
+        position: relative;
+        width: 245px;
+        border-radius: 15px;
+        z-index: 10;
+      }
+
+      .vinyl {
+        -webkit-animation: spin 1s linear infinite;
+        -moz-animation: spin 1s linear infinite;
+        animation: spin 1s linear infinite;
+        -webkit-transition: all 500ms;
+        -moz-transition: all 500ms;
+        transition: all 500ms;
+        background-image: url("/disk.png"), url("/cover.jpg");
+        background-position: center, center;
+        background-size: cover, 40% auto;
+        background-repeat: no-repeat;
+        border-radius: 100%;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+        height: 220px;
+        position: absolute;
+        top: 14px;
+        z-index: 5;
+        width: 220px;
+        will-change: transform, left;
+      }
+      .is-playing .vinyl {
+      }
+      .spinss {
+        top: 0;
+        height: 180px;
+        position: absolute;
+        z-index: 5;
+        width: 180px;
+        animation: spinss 5s forwards;
+        animation-delay: 5s;
+      }
+      @keyframes spinss {
+        0% {
+          left: 10%;
+        }
+        100% {
+          left: 55%;
+        }
+      }
+      .music-player-controls {
+        text-align: center;
+      }
+
+      .bar-c {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 60px;
+        width: 45px;
+        margin: 0 auto;
+        position: relative;
+        cursor: pointer;
+        position: absolute;
+        right: 0;
+      }
+
+      .bar {
+        height: 1px;
+        width: 3px;
+        background-color: #ffffd2;
+        margin: 0 3px;
+        animation-duration: 500ms;
+        animation-direction: alternate;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+      }
+
+      .bar.noAnim {
+        animation: none;
+      }
+
+      .bar:nth-child(1) {
+        animation-name: danceHeight1;
+        animation-delay: 0ms;
+      }
+      .bar:nth-child(2) {
+        animation-name: danceHeight2;
+        animation-delay: 300ms;
+      }
+      .bar:nth-child(3) {
+        animation-name: danceHeight3;
+        animation-delay: 600ms;
+      }
+      .bar:nth-child(4) {
+        animation-name: danceHeight4;
+        animation-delay: 900ms;
+      }
+      .bar:nth-child(5) {
+        animation-name: danceHeight5;
+        animation-delay: 1200ms;
+      }
+      .bar:nth-child(6) {
+        animation-name: danceHeight6;
+        animation-delay: 1500ms;
+      }
+
+      @keyframes danceHeight1 {
+        from {
+          height: 1px;
+        }
+        to {
+          height: 22px;
+        }
+      }
+      @keyframes danceHeight2 {
+        from {
+          height: 1px;
+        }
+        to {
+          height: 15px;
+        }
+      }
+      @keyframes danceHeight3 {
+        from {
+          height: 1px;
+        }
+        to {
+          height: 30px;
+        }
+      }
+      @keyframes danceHeight4 {
+        from {
+          height: 1px;
+        }
+        to {
+          height: 20px;
+        }
+      }
+      @keyframes danceHeight5 {
+        from {
+          height: 1px;
+        }
+        to {
+          height: 15px;
+        }
+      }
+      @keyframes danceHeight6 {
+        from {
+          height: 1px;
+        }
+        to {
+          height: 15px;
+        }
+      }
+
+      [class^="control-"] {
+        -webkit-filter: brightness(95%);
+        filter: brightness(95%);
+        border-radius: 100%;
+        display: inline-block;
+        height: 44px;
+        margin: 0 3px;
+        width: 44px;
+      }
+      [class^="control-"]:hover {
+        -webkit-filter: brightness(85%);
+        filter: brightness(85%);
+        cursor: pointer;
+      }
+
+      .control-play {
+        background: #000000cf
+          url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/83141/play.svg")
+          center/cover no-repeat;
+        box-shadow: 0px 4px 5px black;
+      }
+      .is-playing .control-play {
+        background: #000000cf
+          url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/83141/pause.svg")
+          center/cover no-repeat;
+        box-shadow: 0px 4px 5px black;
+      }
+
+      .control-forwards {
+        background: #000000cf
+          url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/83141/forwards.svg")
+          center/cover no-repeat;
+        box-shadow: 0px 4px 5px black;
+      }
+
+      .control-back {
+        background: #000000cf
+          url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/83141/backwards.svg")
+          center/cover no-repeat;
+        box-shadow: 0px 4px 5px black;
+      }
+
+      @-webkit-keyframes spin {
+        0% {
+          -webkit-transform: rotate(0deg);
+        }
+        100% {
+          -webkit-transform: rotate(360deg);
+        }
+      }
+      @-moz-keyframes spin {
+        0% {
+          -moz-transform: rotate(0deg);
+        }
+        100% {
+          -moz-transform: rotate(360deg);
+        }
+      }
+      @keyframes spin {
+        0% {
+          -webkit-transform: rotate(0deg);
+          -moz-transform: rotate(0deg);
+          -ms-transform: rotate(0deg);
+          -o-transform: rotate(0deg);
+          transform: rotate(0deg);
+        }
+        100% {
+          -webkit-transform: rotate(360deg);
+          -moz-transform: rotate(360deg);
+          -ms-transform: rotate(360deg);
+          -o-transform: rotate(360deg);
+          transform: rotate(360deg);
+        }
+      }
+
+      .row-icons {
+        position: absolute;
+        display: flex;
+        left: 21px;
+
+        h3 {
+          font-size: 1rem;
+          color: #fff;
+          font-weight: 100;
+          padding-top: 6%;
+          padding-left: 5%;
+          align-self: center;
+    display: flex;
+        }
+        img {
+          width: 40px;
+          height: 40px;
+          filter: invert();
+          margin: 10px;
+        }
+      }
+
+      .container {
+        position: relative;
+        width: 300px;
+        height: 300px;
+        margin: 70px auto;
+        margin-left: -60px;
+        background: none;
+        top: 0;
+        left: 0;
+      }
+      .sound {
+        position: absolute;
+        width: 30%;
+        height: 20%;
+        background: white;
+        top: 60%;
+        left: 65%;
+        border-radius: 3px;
+      }
+      .circle-one {
+        position: absolute;
+        width: 21%;
+        height: 23%;
+        background: white;
+        top: 57%;
+        left: 85%;
+        border-radius: 50%;
+        transition: rotate(30deg);
+      }
+      .circle-two {
+        position: absolute;
+        width: 30%;
+        height: 30%;
+        background: white;
+        top: 45%;
+        left: 65%;
+        border-radius: 50%;
+        transition: rotate(30deg);
+      }
+      .cloud span {
+        position: absolute;
+        dispaly: block;
+        background: white;
+        border-radius: 10px;
+        -web-kit-animation: waving 1.5s infinite linear;
+        animation: waving 1.5s infinite linear;
+      }
+      span:nth-of-type(2) {
+        width: 8.5px;
+        height: 40px;
+        top: 66%;
+        left: -4%;
+        animation-delay: 0.2s;
+        -web-kit-animation-delay: 0.2s;
+      }
+      span:nth-of-type(3) {
+        height: 50px;
+        width: 10px;
+        top: 63%;
+        left: 5%;
+        animation-delay: 0.4s;
+        -web-kit-animation-delay: 0.4s;
+      }
+      span:nth-of-type(4) {
+        height: 60px;
+        width: 12.5px;
+        top: 60%;
+        left: 15%;
+        animation-delay: 0.6s;
+        -web-kit-animation-delay: 0.6s;
+      }
+      span:nth-of-type(5) {
+        height: 70px;
+        width: 15px;
+        top: 57%;
+        left: 25%;
+        animation-delay: 0.8s;
+        -web-kit-animation-delay: 0.8s;
+      }
+      span:nth-of-type(6) {
+        height: 80px;
+        width: 17.5px;
+        top: 54%;
+        left: 35%;
+        animation-delay: 1s;
+        -web-kit-animation-delay: 1s;
+      }
+      span:nth-of-type(7) {
+        height: 90px;
+        width: 20px;
+        top: 51%;
+        left: 45%;
+        animation-delay: 1.2s;
+        -web-kit-animation-delay: 1.2s;
+      }
+      span:nth-of-type(8) {
+        height: 100px;
+        width: 22.5px;
+        top: 48%;
+        left: 55%;
+        animation-delay: 1.4s;
+        -web-kit-animation-delay: 1.4s;
+      }
+      @keyframes waving {
+        0% {
+          transform: translatey(0);
+        }
+        50% {
+          transform: translatey(10px);
+        }
+        100% {
+          transform: translatey(0);
+        }
+      }
+      @-webkit-keyframes waving {
+        0% {
+          transform: translatey(0);
+        }
+        50% {
+          transform: translatey(10px);
+        }
+        100% {
+          transform: translatey(0);
+        }
+      }
+
+      .icon-plays{
+        zoom: 15%;
+      }
+    </style>
+
+    <script>
+      window.console = window.console || function (t) {};
+    </script>
+  </head>
+
+  <body translate="no">
+    <div class="bgbg"></div>
+
+    <div class="music-player-container is-playing">
+      <div class="music-player">
+        <div class="player-content-container">
+          <div class="bar-c" style="display: none;">
+            <div id="bar-1" class="bar"></div>
+            <div id="bar-2" class="bar"></div>
+            <div id="bar-3" class="bar"></div>
+            <div id="bar-4" class="bar"></div>
+            <div id="bar-5" class="bar"></div>
+            <div id="bar-6" class="bar"></div>
+          </div>
+
+          <h1 class="artist-name">Ghors2 (Cover)</h1>
+          <!--  /.track-title -->
+          <h2 class="album-title">Rastaan</h2>
+          <!--  /.album-title -->
+          <h3 class="song-title">TRACK</h3>
+
+          <div class="row-icons">
+            <div class="icon-plays">
+              <div class="container">
+                <div class="sound"></div>
+                <div class="circle-one"></div>
+                <div class="circle-two"></div>
+                <div class="cloud">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+            </div>
+            <h3 class="icon-title">RASSTANREALMUSIC</h3>
+          </div>
+
+          <!--  
+            <div class="music-player-controls">
+              <div class="control-back"></div>
+              <div class="control-play"></div>
+              <div class="control-forwards"></div>
+            </div>
+            /.music-player-controls -->
+        </div>
+        <!--  /.player-content-container -->
+      </div>
+      <!--  /.music-player -->
+
+      <div class="album">
+        <div class="album-art"></div>
+        <!--  /.album-art -->
+        <div class="spinss">
+          <div class="vinyl"></div>
+        </div>
+        <!--  /.vinyl -->
+      </div>
+      <!--  /.album-art -->
+    </div>
+
+    <!--  /.music-player -->
+    <script>
+      var clicked = true;
+
+      $(".bar-c").click(function () {
+        if (clicked) {
+          $(".bar").addClass("noAnim");
+          clicked = false;
+        } else {
+          $(".bar").removeClass("noAnim");
+          clicked = true;
+        }
+      });
+    </script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script id="rendered-js">
+      (function ($) {
+        $(document).ready(function () {
+          // Pause/Play functionality
+          var playButton = $(".control-play"),
+            album = $(".album");
+
+          playButton.on("click", function () {
+            $(".music-player-container").toggleClass("is-playing");
+          });
+        });
+      })(jQuery);
+      //# sourceURL=pen.js
+    </script>
+  </body>
+</html>
